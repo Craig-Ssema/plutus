@@ -1,0 +1,8 @@
+{
+  "name": "plutus-enhanced-features",
+  "description": "Installation script for Plutus enhanced features",
+  "scripts": {
+    "install-deps": "npm install @radix-ui/react-scroll-area @radix-ui/react-alert-dialog class-variance-authority",
+    "setup": "echo 'Run database-setup.sql in Supabase SQL Editor' && echo 'Enable Realtime for: community_messages, direct_messages, online_users' && npm run install-deps"
+  }
+}

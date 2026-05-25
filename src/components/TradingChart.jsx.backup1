@@ -1,0 +1,282 @@
+import React, { useState, useEffect } from 'react';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { TrendingUp, TrendingDown, RefreshCw, AlertCircle } from 'lucide-react';
+import { useTheme } from '@/contexts/ThemeContext';
+import { cn } from '@/lib/utils';
+import { fetchChartData } from '@/services/chartDataService';
+
+const TradingChart = ({ asset }) => {
+  const { theme } = useTheme();
+  const [timeframe, setTimeframe] = useState('1D');
+  const [chartData, setChartData] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  
+  // DEBUG: Log when component receives asset
+  useEffect(() => {
+    console.log('TradingChart received asset:', asset);
+  }, [asset]);
+
+  // Fetch real chart data when asset or timeframe changes
+  useEffect(() => {
+    const loadChartData = async () => {
+      // Early return if no asset
+      if (!asset) {
+        console.log('TradingChart: No asset provided');
+        return;
+      }
+      
+      if (!asset.symbol) {
+        console.log('TradingChart: Asset has no symbol', asset);
+        return;
+      }
+      
+      console.log(`Loading chart data for ${asset.symbol} (${timeframe})`);
+      
+      setLoading(true);
+      setError(null);
+      
+      try {
+        const assetType = asset.type || 'crypto';
+        const response = await fetchChartData(asset.symbol, timeframe, assetType);
+        
+        if (response && response.ohlcv && response.ohlcv.length > 0) {
+          const priceData = response.ohlcv.map(candle => ({
+            time: candle.time,
+            price: candle.close
+          }));
+          
+          console.log(`✓ Chart data loaded: ${priceData.length} points`);
+          setChartData(priceData);
+          setError(null);
+        } else {
+          throw new Error('No data available');
+        }
+      } catch (err) {
+        console.error(`Chart error for ${asset.symbol}:`, err.message);
+        
+        // Use fallback mock data
+        const basePrice = Number(asset.price) || 43000;
+        const mockData = Array.from({ length: 50 }, (_, i) => ({
+          time: i,
+          price: basePrice + (Math.random() - 0.5) * (basePrice * 0.02),
+        }));
+        
+        console.log('Using mock chart data');
+        setChartData(mockData);
+        setError('Using sample data - API unavailable');
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    loadChartData();
+  }, [asset?.symbol, timeframe]);
+
+  // Handle null or undefined asset
+  if (!asset) {
+    return (
+      <div className={cn(
+        "w-full h-[400px] flex flex-col items-center justify-center gap-4 p-8",
+        theme === 'dark' ? 'bg-zinc-900/50' : theme === 'gradient' ? 'bg-white/5' : 'bg-gray-50',
+        "rounded-lg border",
+        theme === 'dark' ? 'border-zinc-800' : theme === 'gradient' ? 'border-white/10' : 'border-gray-200'
+      )}>
+        <AlertCircle className={cn(
+          "w-12 h-12",
+          theme === 'dark' ? 'text-gray-600' : theme === 'gradient' ? 'text-white/30' : 'text-gray-400'
+        )} />
+        <p className={cn(
+          "text-lg font-medium",
+          theme === 'dark' ? 'text-gray-400' : theme === 'gradient' ? 'text-white/70' : 'text-gray-500'
+        )}>No asset selected</p>
+        <p className={cn(
+          "text-sm",
+          theme === 'dark' ? 'text-gray-500' : theme === 'gradient' ? 'text-white/50' : 'text-gray-400'
+        )}>Select an asset from the Markets page to view its chart</p>
+      </div>
+    );
+  }
+
+  if (!asset.symbol) {
+    return (
+      <div className={cn(
+        "w-full h-[400px] flex items-center justify-center",
+        theme === 'dark' ? 'bg-zinc-900/50' : theme === 'gradient' ? 'bg-white/5' : 'bg-gray-50',
+        "rounded-lg"
+      )}>
+        <p className={cn(
+          theme === 'dark' ? 'text-gray-400' : theme === 'gradient' ? 'text-white/70' : 'text-gray-500'
+        )}>Invalid asset data</p>
+      </div>
+    );
+  }
+
+  const timeframes = ['1D', '5D', '1M', '3M', '1Y', '5Y'];
+
+  // Use the new data structure
+  const isPositive = (asset.change_24h_percent || 0) >= 0;
+  const gradientColor = isPositive ? 'url(#positiveGradient)' : 'url(#negativeGradient)';
+  const strokeColor = isPositive ? '#16a34a' : '#dc2626';
+
+  return (
+    <div className="w-full h-full flex flex-col p-4">
+      {/* Asset info header */}
+      <div className="mb-4">
+        <div className="flex items-center gap-2">
+          <h3 className={cn(
+            "text-lg font-semibold",
+            theme === 'dark' ? 'text-white' : theme === 'gradient' ? 'text-white' : 'text-gray-900'
+          )}>
+            {asset.name} ({asset.symbol})
+          </h3>
+          <span className={cn(
+            "text-sm px-2 py-1 rounded",
+            theme === 'dark' ? 'bg-zinc-800 text-gray-300' : theme === 'gradient' ? 'bg-white/10 text-white/70' : 'bg-gray-100 text-gray-600'
+          )}>
+            {asset.type || 'crypto'}
+          </span>
+        </div>
+      </div>
+
+      {/* Time period selector */}
+      <div className="flex gap-2 mb-4 items-center">
+        {timeframes.map((tf) => (
+          <button
+            key={tf}
+            onClick={() => setTimeframe(tf)}
+            disabled={loading}
+            className={cn(
+              "px-3 py-1 text-sm font-medium rounded-lg transition-all",
+              timeframe === tf
+                ? theme === 'dark'
+                  ? 'bg-gradient-to-r from-red-600 to-orange-500 text-white'
+                  : theme === 'gradient'
+                  ? 'bg-white/20 text-white backdrop-blur-md border border-white/30'
+                  : 'bg-blue-500 text-white'
+                : theme === 'dark'
+                ? 'text-gray-400 hover:bg-zinc-800'
+                : theme === 'gradient'
+                ? 'text-white/70 hover:bg-white/10'
+                : 'text-gray-600 hover:bg-gray-100',
+              loading && 'opacity-50 cursor-not-allowed'
+            )}
+          >
+            {tf}
+          </button>
+        ))}
+        {loading && (
+          <RefreshCw className={cn(
+            "w-4 h-4 animate-spin ml-2",
+            theme === 'dark' ? 'text-gray-400' : theme === 'gradient' ? 'text-white/70' : 'text-gray-600'
+          )} />
+        )}
+      </div>
+      
+      {/* Error/Info message */}
+      {error && (
+        <div className={cn(
+          "text-xs mb-2 px-3 py-2 rounded flex items-center gap-2",
+          theme === 'dark' ? 'bg-yellow-900/20 text-yellow-400' : theme === 'gradient' ? 'bg-white/10 text-white/90' : 'bg-yellow-50 text-yellow-700'
+        )}>
+          <AlertCircle className="w-4 h-4" />
+          {error}
+        </div>
+      )}
+
+      {/* Chart */}
+      <div className="w-full h-[400px]">
+        {chartData.length === 0 ? (
+          <div className={cn(
+            "w-full h-full flex items-center justify-center",
+            theme === 'dark' ? 'bg-zinc-900/50' : theme === 'gradient' ? 'bg-white/5' : 'bg-gray-50',
+            "rounded-lg"
+          )}>
+            <div className="text-center">
+              <RefreshCw className={cn(
+                "w-8 h-8 animate-spin mx-auto mb-2",
+                theme === 'dark' ? 'text-gray-400' : theme === 'gradient' ? 'text-white/50' : 'text-gray-400'
+              )} />
+              <p className={cn(
+                "text-sm",
+                theme === 'dark' ? 'text-gray-400' : theme === 'gradient' ? 'text-white/70' : 'text-gray-500'
+              )}>
+                Loading chart data...
+              </p>
+            </div>
+          </div>
+        ) : (
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart data={chartData} margin={{ top: 5, right: 5, left: -25, bottom: 5 }}>
+              <defs>
+                <linearGradient id="positiveGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor={strokeColor} stopOpacity={0.8}/>
+                  <stop offset="95%" stopColor={strokeColor} stopOpacity={0}/>
+                </linearGradient>
+                <linearGradient id="negativeGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor={strokeColor} stopOpacity={0.8}/>
+                  <stop offset="95%" stopColor={strokeColor} stopOpacity={0}/>
+                </linearGradient>
+              </defs>
+              <CartesianGrid 
+                strokeDasharray="3 3" 
+                stroke={theme === 'dark' ? '#27272a' : theme === 'gradient' ? 'rgba(255,255,255,0.1)' : '#e5e7eb'} 
+                vertical={false} 
+              />
+              <XAxis 
+                dataKey="time" 
+                stroke={theme === 'dark' ? '#52525b' : theme === 'gradient' ? 'rgba(255,255,255,0.5)' : '#9ca3af'} 
+                tick={{fontSize: 12}} 
+                tickLine={false} 
+                axisLine={false} 
+              />
+              <YAxis 
+                stroke={theme === 'dark' ? '#52525b' : theme === 'gradient' ? 'rgba(255,255,255,0.5)' : '#9ca3af'} 
+                tick={{fontSize: 12}} 
+                orientation="right" 
+                tickLine={false} 
+                axisLine={false} 
+                domain={['auto', 'auto']}
+                tickFormatter={(value) => `$${value.toFixed(0)}`}
+              />
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: theme === 'dark' ? 'rgba(24, 24, 27, 0.95)' : theme === 'gradient' ? 'rgba(255, 255, 255, 0.25)' : 'rgba(255, 255, 255, 0.95)',
+                  backdropFilter: 'blur(10px)',
+                  border: theme === 'dark' ? '1px solid rgba(244, 63, 94, 0.3)' : theme === 'gradient' ? '1px solid rgba(255,255,255,0.2)' : '1px solid #e5e7eb',
+                  borderRadius: '8px',
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                  color: theme === 'dark' ? '#fff' : theme === 'gradient' ? '#fff' : '#374151',
+                  padding: '8px 12px'
+                }}
+                formatter={(value) => [`$${Number(value).toFixed(2)}`, 'Price']}
+                labelFormatter={(label) => `Time: ${label}`}
+              />
+              <Area
+                type="monotone"
+                dataKey="price"
+                stroke={strokeColor}
+                strokeWidth={2.5}
+                fill={gradientColor}
+                dot={false}
+                animationDuration={300}
+              />
+            </AreaChart>
+          </ResponsiveContainer>
+        )}
+      </div>
+
+      {/* Data points info */}
+      {chartData.length > 0 && (
+        <div className={cn(
+          "text-xs mt-2 text-center",
+          theme === 'dark' ? 'text-gray-500' : theme === 'gradient' ? 'text-white/50' : 'text-gray-400'
+        )}>
+          {chartData.length} data points • Updated {new Date().toLocaleTimeString()}
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default TradingChart;

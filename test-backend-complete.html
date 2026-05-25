@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plutus Backend API Tester</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: white;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+
+        .subtitle {
+            color: rgba(255, 255, 255, 0.9);
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 1.1rem;
+        }
+
+        .test-section {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .test-section h2 {
+            color: #667eea;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-left: auto;
+        }
+
+        .status-pending {
+            background: #f3f4f6;
+            color: #6b7280;
+        }
+
+        .status-success {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .status-error {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .result-box {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            max-height: 400px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(102, 126, 234, 0.3);
+            border-radius: 50%;
+            border-top-color: #667eea;
+            animation: spin 1s linear infinite;
+            margin-left: 10px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .stat-card {
+            background: #f3f4f6;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-label {
+            color: #6b7280;
+            font-size: 0.9rem;
+            margin-top: 5px;
+        }
+
+        .success-message {
+            color: #166534;
+            background: #dcfce7;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .error-message {
+            color: #991b1b;
+            background: #fee2e2;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .info-box {
+            background: #dbeafe;
+            color: #1e3a8a;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .endpoint-url {
+            background: #1f2937;
+            color: #10b981;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            display: inline-block;
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 Plutus Backend API Tester</h1>
+        <p class="subtitle">Test your backend proxy server endpoints</p>
+
+        <div class="info-box">
+            <strong>📌 Before Testing:</strong><br>
+            Make sure your backend server is running on <code>http://localhost:3001</code><br>
+            Start it with: <code>cd server && npm run dev</code>
+        </div>
+
+        <!-- Health Check -->
+        <div class="test-section">
+            <h2>
+                🏥 Health Check
+                <span id="health-status" class="status-badge status-pending">Not Tested</span>
+            </h2>
+            <p>Verify that the backend server is running and accessible.</p>
+            <div style="margin-top: 15px;">
+                <button onclick="testHealth()">Test Health Endpoint</button>
+                <div class="endpoint-url">GET /api/health</div>
+            </div>
+            <div id="health-result"></div>
+        </div>
+
+        <!-- Crypto Data -->
+        <div class="test-section">
+            <h2>
+                ₿ Cryptocurrency Data
+                <span id="crypto-status" class="status-badge status-pending">Not Tested</span>
+            </h2>
+            <p>Fetch real-time cryptocurrency market data (BTC, ETH, SOL, etc.)</p>
+            <div style="margin-top: 15px;">
+                <button onclick="testCrypto()">Test Crypto Endpoint</button>
+                <div class="endpoint-url">GET /api/crypto</div>
+            </div>
+            <div id="crypto-stats"></div>
+            <div id="crypto-result"></div>
+        </div>
+
+        <!-- Stock Data -->
+        <div class="test-section">
+            <h2>
+                📈 Stock Market Data
+                <span id="stock-status" class="status-badge status-pending">Not Tested</span>
+            </h2>
+            <p>Fetch real-time stock market data (AAPL, GOOGL, TSLA, etc.)</p>
+            <div style="margin-top: 15px;">
+                <button onclick="testStocks()">Test Stock Endpoint</button>
+                <div class="endpoint-url">GET /api/stocks</div>
+            </div>
+            <div id="stock-stats"></div>
+            <div id="stock-result"></div>
+        </div>
+
+        <!-- All Markets -->
+        <div class="test-section">
+            <h2>
+                🌐 All Market Data
+                <span id="markets-status" class="status-badge status-pending">Not Tested</span>
+            </h2>
+            <p>Fetch combined cryptocurrency and stock market data.</p>
+            <div style="margin-top: 15px;">
+                <button onclick="testMarkets()">Test Markets Endpoint</button>
+                <div class="endpoint-url">GET /api/markets</div>
+            </div>
+            <div id="markets-stats"></div>
+            <div id="markets-result"></div>
+        </div>
+
+        <!-- Chart Data -->
+        <div class="test-section">
+            <h2>
+                📊 Historical Chart Data
+                <span id="chart-status" class="status-badge status-pending">Not Tested</span>
+            </h2>
+            <p>Fetch historical candlestick (OHLCV) data for technical analysis.</p>
+            <div style="margin-top: 15px;">
+                <button onclick="testChart('BTC', '1D', 'crypto')">Test BTC 1D</button>
+                <button onclick="testChart('ETH', '1M', 'crypto')">Test ETH 1M</button>
+                <button onclick="testChart('AAPL', '5D', 'stock')">Test AAPL 5D</button>
+                <div class="endpoint-url">GET /api/charts/:symbol?timeframe=X&type=Y</div>
+            </div>
+            <div id="chart-stats"></div>
+            <div id="chart-result"></div>
+        </div>
+
+        <!-- Test All -->
+        <div class="test-section" style="text-align: center;">
+            <h2>⚡ Run All Tests</h2>
+            <button onclick="testAll()" style="font-size: 1.1rem; padding: 15px 40px;">
+                Test All Endpoints
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:3001';
+
+        function setStatus(id, status, message) {
+            const badge = document.getElementById(id);
+            badge.className = `status-badge status-${status}`;
+            badge.textContent = message;
+        }
+
+        async function testHealth() {
+            const resultDiv = document.getElementById('health-result');
+            resultDiv.innerHTML = '<div class="loading"></div> Testing...';
+            setStatus('health-status', 'pending', 'Testing...');
+
+            try {
+                const response = await fetch(`${API_BASE}/api/health`);
+                const data = await response.json();
+
+                if (response.ok) {
+                    setStatus('health-status', 'success', '✓ Running');
+                    resultDiv.innerHTML = `
+                        <div class="success-message">✓ Backend server is running successfully!</div>
+                        <div class="result-box">${JSON.stringify(data, null, 2)}</div>
+                    `;
+                } else {
+                    throw new Error('Server returned error status');
+                }
+            } catch (error) {
+                setStatus('health-status', 'error', '✗ Failed');
+                resultDiv.innerHTML = `
+                    <div class="error-message">✗ Failed to connect to backend server</div>
+                    <div class="result-box">Error: ${error.message}
+
+Make sure the backend is running:
+cd server
+npm run dev</div>
+                `;
+            }
+        }
+
+        async function testCrypto() {
+            const resultDiv = document.getElementById('crypto-result');
+            const statsDiv = document.getElementById('crypto-stats');
+            resultDiv.innerHTML = '<div class="loading"></div> Fetching cryptocurrency data...';
+            statsDiv.innerHTML = '';
+            setStatus('crypto-status', 'pending', 'Testing...');
+
+            try {
+                const response = await fetch(`${API_BASE}/api/crypto`);
+                const data = await response.json();
+
+                if (response.ok && Array.isArray(data)) {
+                    setStatus('crypto-status', 'success', `✓ ${data.length} assets`);
+                    
+                    statsDiv.innerHTML = `
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <div class="stat-value">${data.length}</div>
+                                <div class="stat-label">Cryptocurrencies</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value">${data[0]?.symbol || 'N/A'}</div>
+                                <div class="stat-label">First Asset</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value">$${data[0]?.price?.toFixed(2) || '0'}</div>
+                                <div class="stat-label">${data[0]?.name || 'Price'}</div>
+                            </div>
+                        </div>
+                    `;
+
+                    resultDiv.innerHTML = `
+                        <div class="success-message">✓ Successfully fetched ${data.length} cryptocurrencies</div>
+                        <div class="result-box">${JSON.stringify(data.slice(0, 3), null, 2)}
+...and ${data.length - 3} more</div>
+                    `;
+                } else {
+                    throw new Error('Invalid response format');
+                }
+            } catch (error) {
+                setStatus('crypto-status', 'error', '✗ Failed');
+                resultDiv.innerHTML = `
+                    <div class="error-message">✗ Failed to fetch crypto data</div>
+                    <div class="result-box">Error: ${error.message}</div>
+                `;
+            }
+        }
+
+        async function testStocks() {
+            const resultDiv = document.getElementById('stock-result');
+            const statsDiv = document.getElementById('stock-stats');
+            resultDiv.innerHTML = '<div class="loading"></div> Fetching stock market data...';
+            statsDiv.innerHTML = '';
+            setStatus('stock-status', 'pending', 'Testing...');
+
+            try {
+                const response = await fetch(`${API_BASE}/api/stocks`);
+                const data = await response.json();
+
+                if (response.ok && Array.isArray(data)) {
+                    setStatus('stock-status', 'success', `✓ ${data.length} stocks`);
+                    
+                    statsDiv.innerHTML = `
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <div class="stat-value">${data.length}</div>
+                                <div class="stat-label">Stocks</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value">${data[0]?.symbol || 'N/A'}</div>
+                                <div class="stat-label">First Stock</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value">$${data[0]?.price?.toFixed(2) || '0'}</div>
+                                <div class="stat-label">${data[0]?.name || 'Price'}</div>
+                            </div>
+                        </div>
+                    `;
+
+                    resultDiv.innerHTML = `
+                        <div class="success-message">✓ Successfully fetched ${data.length} stocks</div>
+                        <div class="result-box">${JSON.stringify(data.slice(0, 3), null, 2)}
+...and ${data.length - 3} more</div>
+                    `;
+                } else {
+                    throw new Error('Invalid response format');
+                }
+            } catch (error) {
+                setStatus('stock-status', 'error', '✗ Failed');
+                resultDiv.innerHTML = `
+                    <div class="error-message">✗ Failed to fetch stock data</div>
+                    <div class="result-box">Error: ${error.message}</div>
+                `;
+            }
+        }
+
+        async function testMarkets() {
+            const resultDiv = document.getElementById('markets-result');
+            const statsDiv = document.getElementById('markets-stats');
+            resultDiv.innerHTML = '<div class="loading"></div> Fetching all market data...';
+            statsDiv.innerHTML = '';
+            setStatus('markets-status', 'pending', 'Testing...');
+
+            try {
+                const response = await fetch(`${API_BASE}/api/markets`);
+                const data = await response.json();
+
+                if (response.ok && Array.isArray(data)) {
+                    const cryptoCount = data.filter(a => a.type === 'crypto').length;
+                    const stockCount = data.filter(a => a.type === 'stock').length;
+                    
+                    setStatus('markets-status', 'success', `✓ ${data.length} total`);
+                    
+                    statsDiv.innerHTML = `
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <div class="stat-value">${data.length}</div>
+                                <div class="stat-label">Total Assets</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value">${cryptoCount}</div>
+                                <div class="stat-label">Cryptocurrencies</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value">${stockCount}</div>
+                                <div class="stat-label">Stocks</div>
+                            </div>
+                        </div>
+                    `;
+
+                    resultDiv.innerHTML = `
+                        <div class="success-message">✓ Successfully fetched ${data.length} total assets (${cryptoCount} crypto + ${stockCount} stocks)</div>
+                        <div class="result-box">${JSON.stringify(data.slice(0, 2), null, 2)}
+...and ${data.length - 2} more</div>
+                    `;
+                } else {
+                    throw new Error('Invalid response format');
+                }
+            } catch (error) {
+                setStatus('markets-status', 'error', '✗ Failed');
+                resultDiv.innerHTML = `
+                    <div class="error-message">✗ Failed to fetch market data</div>
+                    <div class="result-box">Error: ${error.message}</div>
+                `;
+            }
+        }
+
+        async function testChart(symbol, timeframe, type) {
+            const resultDiv = document.getElementById('chart-result');
+            const statsDiv = document.getElementById('chart-stats');
+            resultDiv.innerHTML = `<div class="loading"></div> Fetching ${symbol} ${timeframe} chart data...`;
+            statsDiv.innerHTML = '';
+            setStatus('chart-status', 'pending', 'Testing...');
+
+            try {
+                const response = await fetch(`${API_BASE}/api/charts/${symbol}?timeframe=${timeframe}&type=${type}`);
+                const data = await response.json();
+
+                if (response.ok && data.ohlcv) {
+                    const candleCount = data.ohlcv.length;
+                    setStatus('chart-status', 'success', `✓ ${candleCount} candles`);
+                    
+                    const firstCandle = data.ohlcv[0];
+                    const lastCandle = data.ohlcv[data.ohlcv.length - 1];
+                    
+                    statsDiv.innerHTML = `
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <div class="stat-value">${candleCount}</div>
+                                <div class="stat-label">Candles</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value">$${lastCandle.close?.toFixed(2) || '0'}</div>
+                                <div class="stat-label">Last Close</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value">$${Math.max(...data.ohlcv.map(c => c.high)).toFixed(2)}</div>
+                                <div class="stat-label">Highest</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value">$${Math.min(...data.ohlcv.map(c => c.low)).toFixed(2)}</div>
+                                <div class="stat-label">Lowest</div>
+                            </div>
+                        </div>
+                    `;
+
+                    resultDiv.innerHTML = `
+                        <div class="success-message">✓ Successfully fetched ${candleCount} candlesticks for ${symbol} (${timeframe})</div>
+                        <div class="result-box">Symbol: ${data.symbol}
+Timeframe: ${data.timeframe}
+Candles: ${candleCount}
+Latest: ${JSON.stringify(lastCandle, null, 2)}</div>
+                    `;
+                } else {
+                    throw new Error(data.error || 'Invalid response format');
+                }
+            } catch (error) {
+                setStatus('chart-status', 'error', '✗ Failed');
+                resultDiv.innerHTML = `
+                    <div class="error-message">✗ Failed to fetch chart data for ${symbol}</div>
+                    <div class="result-box">Error: ${error.message}</div>
+                `;
+            }
+        }
+
+        async function testAll() {
+            await testHealth();
+            await new Promise(resolve => setTimeout(resolve, 500));
+            await testCrypto();
+            await new Promise(resolve => setTimeout(resolve, 500));
+            await testStocks();
+            await new Promise(resolve => setTimeout(resolve, 500));
+            await testMarkets();
+            await new Promise(resolve => setTimeout(resolve, 500));
+            await testChart('BTC', '1D', 'crypto');
+        }
+
+        // Auto-test health on page load
+        window.addEventListener('load', () => {
+            setTimeout(testHealth, 500);
+        });
+    </script>
+</body>
+</html>

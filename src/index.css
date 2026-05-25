@@ -1,0 +1,242 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Default/Light theme variables */
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 222.2 47.4% 11.2%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 222.2 84% 4.9%;
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9%;
+  }
+
+  /* High Contrast Theme */
+  .contrast-high {
+    --background: 0 0% 0%;
+    --foreground: 0 0% 100%;
+    --card: 0 0% 10%;
+    --card-foreground: 0 0% 100%;
+    --popover: 0 0% 0%;
+    --popover-foreground: 0 0% 100%;
+    --primary: 0 0% 100%;
+    --primary-foreground: 0 0% 0%;
+    --secondary: 0 0% 15%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 0 0% 15%;
+    --muted-foreground: 0 0% 80%;
+    --accent: 0 0% 20%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 100% 50%;
+    --destructive-foreground: 0 0% 0%;
+    --border: 0 0% 40%;
+    --input: 0 0% 20%;
+    --ring: 60 100% 50%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+    min-height: 100vh;
+  }
+  body.theme-gradient {
+    background: linear-gradient(
+      135deg,
+      #1a1a1a 0%,
+      #2d1b69 25%,
+      #1a3a52 50%,
+      #2d1b69 75%,
+      #1a1a1a 100%
+    ) !important;
+    background-attachment: fixed !important;
+  }
+  .seizure-safe * {
+    transition: none !important;
+    animation: none !important;
+  }
+  .seizure-safe {
+    filter: saturate(0.7);
+  }
+  .adhd-focus {
+    @apply border-4 border-blue-500 m-2;
+  }
+}
+
+/* Theme-specific styles */
+
+/* Dark Theme */
+.theme-dark {
+  background: #000000;
+}
+
+.theme-dark input,
+.theme-dark textarea {
+  @apply bg-zinc-800 border-red-900/30 text-white placeholder:text-gray-500;
+}
+
+.theme-dark input:focus,
+.theme-dark textarea:focus {
+  @apply border-orange-500 ring-orange-500/20;
+}
+
+.theme-dark label {
+  @apply text-gray-300;
+}
+
+/* Light Theme */
+.theme-light {
+  background: #f9fafb;
+}
+
+.theme-light input,
+.theme-light textarea {
+  @apply bg-white border-gray-300 text-gray-900 placeholder:text-gray-400;
+}
+
+.theme-light input:focus,
+.theme-light textarea:focus {
+  @apply border-blue-500 ring-blue-500/20;
+}
+
+.theme-light label {
+  @apply text-gray-700;
+}
+
+/* Gradient Theme - Professional Trading Look */
+.theme-gradient {
+  min-height: 100vh;
+  background: linear-gradient(
+    135deg,
+    #1a1a1a 0%,      /* Dark base */
+    #2d1b69 25%,     /* Purple tint */
+    #1a3a52 50%,     /* Blue tint */
+    #2d1b69 75%,     /* Purple tint */
+    #1a1a1a 100%     /* Dark base */
+  );
+  background-attachment: fixed;
+  background-size: cover;
+}
+
+/* Gradient theme form elements */
+.theme-gradient input,
+.theme-gradient textarea,
+.theme-gradient select {
+  @apply bg-white/10 backdrop-blur-md border-white/20 text-white placeholder:text-white/50;
+}
+
+.theme-gradient input:focus,
+.theme-gradient textarea:focus,
+.theme-gradient select:focus {
+  @apply border-white/40 ring-white/20 bg-white/15;
+}
+
+.theme-gradient label {
+  @apply text-white/90 font-medium;
+}
+
+/* Gradient theme cards and containers */
+.theme-gradient .card,
+.theme-gradient [class*="bg-"] {
+  @apply backdrop-blur-md;
+}
+
+/* Gradient theme glassmorphism effect for cards */
+.theme-gradient .glassmorphism {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+/* Gradient theme buttons */
+.theme-gradient button:not([class*="bg-"]) {
+  @apply bg-white/10 hover:bg-white/20 border-white/20;
+}
+
+/* Gradient theme text adjustments */
+.theme-gradient,
+.theme-gradient * {
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.theme-gradient p,
+.theme-gradient span,
+.theme-gradient div,
+.theme-gradient label,
+.theme-gradient td,
+.theme-gradient th {
+  color: inherit;
+}
+
+.theme-gradient h1,
+.theme-gradient h2,
+.theme-gradient h3,
+.theme-gradient h4,
+.theme-gradient h5,
+.theme-gradient h6 {
+  @apply text-white;
+}
+
+/* Smooth theme transitions */
+body {
+  transition: background 0.3s ease;
+}
+
+/* Ensure gradient theme overrides all backgrounds */
+body.theme-gradient,
+body.theme-gradient #root,
+body.theme-gradient .min-h-screen {
+  background: linear-gradient(
+    135deg,
+    #1a1a1a 0%,
+    #2d1b69 25%,
+    #1a3a52 50%,
+    #2d1b69 75%,
+    #1a1a1a 100%
+  ) !important;
+  background-attachment: fixed !important;
+  min-height: 100vh;
+}

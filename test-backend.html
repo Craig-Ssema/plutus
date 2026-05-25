@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Backend Test</title>
+</head>
+<body>
+    <h1>Backend Connection Test</h1>
+    <button onclick="testBackend()">Test Backend</button>
+    <div id="result"></div>
+
+    <script>
+        async function testBackend() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '<p>Testing...</p>';
+            
+            try {
+                // Test health endpoint
+                const response = await fetch('http://localhost:3001/api/health');
+                const data = await response.json();
+                
+                resultDiv.innerHTML = `
+                    <h2 style="color: green;">✅ Backend is Running!</h2>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                `;
+                
+                // Test market data
+                const marketsResponse = await fetch('http://localhost:3001/api/markets');
+                const marketsData = await marketsResponse.json();
+                
+                resultDiv.innerHTML += `
+                    <h2 style="color: green;">✅ Market Data Retrieved!</h2>
+                    <p>Found ${marketsData.length} assets</p>
+                    <pre>${JSON.stringify(marketsData.slice(0, 2), null, 2)}</pre>
+                `;
+                
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <h2 style="color: red;">❌ Backend Connection Failed</h2>
+                    <p>${error.message}</p>
+                    <p>Make sure the backend server is running on port 3001</p>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>
