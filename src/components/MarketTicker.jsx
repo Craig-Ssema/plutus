@@ -50,7 +50,7 @@ const MarketTicker = () => {
   const duplicatedTickers = tickers.length > 0 ? [...tickers, ...tickers, ...tickers] : [];
 
   return (
-    <div className="bg-gray-900 text-white py-3 overflow-hidden fixed w-full top-0 left-0 z-[60] h-12 flex items-center">
+    <div className="bg-white border-b border-gray-200 py-3 overflow-hidden fixed w-full top-0 left-0 z-[60] h-12 flex items-center">
       {tickers.length > 0 && (
         <motion.div
           animate={{ x: ['0%', '-100%'] }}
@@ -59,9 +59,9 @@ const MarketTicker = () => {
         >
           {duplicatedTickers.map((ticker, index) => (
             <div key={`${ticker.symbol}-${index}`} className="flex items-center space-x-3">
-              <span className="font-semibold text-sm">{ticker.symbol}</span>
-              <span className="text-gray-300 text-sm">${Number(ticker.price).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-              <span className={ticker.change_24h_percent >= 0 ? 'text-green-400 text-sm' : 'text-red-400 text-sm'}>
+              <span className="font-semibold text-sm text-gray-900">{ticker.symbol}</span>
+              <span className="text-gray-500 text-sm tabular-nums">${Number(ticker.price).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+              <span className={(ticker.change_24h_percent >= 0 ? 'text-[#00A862]' : 'text-[#E5484D]') + ' text-sm font-medium tabular-nums'}>
                 {ticker.change_24h_percent >= 0 ? '▲' : '▼'} {Math.abs(ticker.change_24h_percent).toFixed(2)}%
               </span>
             </div>

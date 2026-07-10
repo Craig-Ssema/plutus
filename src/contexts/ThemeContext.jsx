@@ -11,41 +11,29 @@ export const useTheme = () => {
 };
 
 export const ThemeProvider = ({ children }) => {
-  const [theme, setTheme] = useState(() => {
-    // Get theme from localStorage or default to 'dark'
-    const savedTheme = localStorage.getItem('plutus-theme');
-    return savedTheme || 'dark';
-  });
+  // Plutus uses a single professional light theme.
+  // The theme API surface is kept intact so existing components don't break,
+  // but 'light' is now the only theme.
+  const [theme] = useState('light');
 
   useEffect(() => {
-    // Save theme to localStorage whenever it changes
-    localStorage.setItem('plutus-theme', theme);
-    
-    // Update document class for global styles
-    document.documentElement.classList.remove('theme-dark', 'theme-light', 'theme-gradient');
-    document.documentElement.classList.add(`theme-${theme}`);
-    
-    // Also update body class for gradient theme
-    document.body.classList.remove('theme-dark', 'theme-light', 'theme-gradient');
-    document.body.classList.add(`theme-${theme}`);
-  }, [theme]);
+    localStorage.setItem('plutus-theme', 'light');
+    document.documentElement.classList.remove('theme-dark', 'theme-gradient');
+    document.documentElement.classList.add('theme-light');
+    document.body.classList.remove('theme-dark', 'theme-gradient');
+    document.body.classList.add('theme-light');
+  }, []);
 
-  const toggleTheme = () => {
-    // Cycle through: dark -> light -> gradient -> dark
-    setTheme(prev => {
-      if (prev === 'dark') return 'light';
-      if (prev === 'light') return 'gradient';
-      return 'dark';
-    });
-  };
+  const setTheme = () => {};
+  const toggleTheme = () => {};
 
   const value = {
     theme,
     setTheme,
     toggleTheme,
-    isDark: theme === 'dark',
-    isLight: theme === 'light',
-    isGradient: theme === 'gradient'
+    isDark: false,
+    isLight: true,
+    isGradient: false
   };
 
   return (

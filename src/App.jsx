@@ -17,7 +17,6 @@ import AccessibilityPanel from '@/components/AccessibilityPanel';
 import { useAccessibility } from '@/contexts/AccessibilityContext';
 import { useAuth } from '@/contexts/SupabaseAuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
-import AnimatedGradientBackground from '@/components/AnimatedGradientBackground';
 import { cn } from '@/lib/utils';
 import MarketsGuest from './pages/MarketsGuest';
 import TradeGuest from './pages/TradeGuest';
@@ -25,7 +24,6 @@ import SignUp from './pages/SignUp';
 import ProtectedRoute from './components/ProtectedRoute';
 import MarketTicker from './components/MarketTicker';
 import AdvancedChart from './pages/charts/AdvancedChart';
-import WavyBackground from './components/WavyBackground';
 import RocketLoader from './components/RocketLoader';
 import NotificationToast from './components/NotificationToast';
 import TransactionHistory from './pages/TransactionHistory';
@@ -54,15 +52,14 @@ const AppContent = () => {
   React.useEffect(() => {
     const handleAchievement = (event) => {
       const achievement = event.detail;
-      
-      // Trigger confetti library if you have one, or just show toast
+
       toast({
         title: "🏆 Achievement Unlocked!",
         description: `${achievement.icon} ${achievement.title} - ${achievement.points} points earned!`,
         duration: 5000
       });
     };
-    
+
     window.addEventListener('achievementUnlocked', handleAchievement);
     return () => window.removeEventListener('achievementUnlocked', handleAchievement);
   }, []);
@@ -77,7 +74,7 @@ const AppContent = () => {
         duration: 6000
       });
     };
-    
+
     window.addEventListener('priceAlertTriggered', handlePriceAlert);
     return () => window.removeEventListener('priceAlertTriggered', handlePriceAlert);
   }, []);
@@ -87,14 +84,14 @@ const AppContent = () => {
     const handleAutoOrder = (event) => {
       const order = event.detail;
       const isProfitable = order.pnl > 0;
-      
+
       toast({
         title: order.type === 'STOP_LOSS' ? '🛑 Stop-Loss Executed' : '🎯 Take-Profit Executed',
         description: `Sold ${order.quantity} ${order.symbol} at ${order.executionPrice.toFixed(2)}. P/L: ${isProfitable ? '+' : ''}${order.pnl.toFixed(2)}`,
         duration: 6000
       });
     };
-    
+
     window.addEventListener('autoOrderExecuted', handleAutoOrder);
     return () => window.removeEventListener('autoOrderExecuted', handleAutoOrder);
   }, []);
@@ -108,34 +105,28 @@ const AppContent = () => {
 
   return (
     <div className={cn(
-      "min-h-screen relative",
-      theme === 'dark' 
-        ? 'bg-black' 
-        : theme === 'gradient'
-        ? 'bg-gradient-to-br from-[#1a1a1a] via-[#2d1b69] to-[#1a3a52]'
-        : 'bg-white',
+      "min-h-screen relative bg-background",
       { 'seizure-safe': seizureSafe }
     )}>
-      {theme === 'light' && <WavyBackground />}
       {showTicker && <MarketTicker />}
       {showNav && <Navigation showTicker={showTicker} />}
       <main className={cn({ 'adhd-focus': adhdFriendly }, showTicker ? 'pt-16' : '')}>
         <Routes>
           <Route path="/" element={isAuthenticated ? <Navigate to="/dashboard" /> : <SignIn />} />
           <Route path="/signup" element={isAuthenticated ? <Navigate to="/dashboard" /> : <SignUp />} />
-          
+
           <Route path="/dashboard" element={<ProtectedRoute><Home /></ProtectedRoute>} />
-          
+
           {/* Allow guest access to Markets, Trade, and Hub pages */}
           <Route path="/markets" element={isAuthenticated ? <Markets /> : <MarketsGuest />} />
           <Route path="/trade" element={isAuthenticated ? <Trade /> : <TradeGuest />} />
           <Route path="/chart/:symbol" element={isAuthenticated ? <AdvancedChart /> : <Navigate to="/" />} />
-          
+
           {/* Hub routes */}
           <Route path="/hub" element={<HubLanding />} />
           <Route path="/hub/news" element={<MarketNews />} />
           <Route path="/hub/community" element={<CommunityPage />} />
-          
+
           <Route path="/history" element={<ProtectedRoute><TransactionHistory /></ProtectedRoute>} />
           <Route path="/education" element={<Education />} />
           <Route path="/support" element={<Support />} />
@@ -143,7 +134,7 @@ const AppContent = () => {
         </Routes>
       </main>
       {readingMask.enabled && (
-        <div 
+        <div
           className="fixed top-0 left-0 w-full h-full pointer-events-none z-[100]"
           style={{
             background: `linear-gradient(to bottom, 

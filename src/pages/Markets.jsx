@@ -230,8 +230,7 @@ const Markets = () => {
       <th 
         scope="col" 
         className={cn(
-          "px-6 py-3 text-left text-xs font-medium uppercase tracking-wider cursor-pointer hover:bg-opacity-50",
-          theme === 'dark' ? 'text-gray-500 hover:bg-zinc-700' : theme === 'gradient' ? 'text-white/70 hover:bg-white/10' : 'text-gray-500 hover:bg-gray-100'
+          "px-6 py-3 text-left text-xs font-medium uppercase tracking-wider cursor-pointer text-gray-500 hover:bg-gray-100 transition-colors"
         )}
         onClick={() => requestSort(sortKey)}
       >
@@ -245,52 +244,21 @@ const Markets = () => {
     );
   };
 
-  // Get theme-appropriate colors
+  // Professional light design system colors
   const getThemeColors = () => {
-    if (theme === 'dark') {
-      return {
-        bg: 'bg-black',
-        cardBg: 'bg-zinc-900 border border-red-900/30',
-        textPrimary: 'text-white',
-        textSecondary: 'text-gray-400',
-        textMuted: 'text-gray-500',
-        border: 'border-red-900/30',
-        hover: 'hover:bg-zinc-800',
-        inputBg: 'bg-zinc-900 border border-red-900/30 text-white focus:ring-orange-500',
-        tableBg: 'bg-zinc-900',
-        tableHeader: 'bg-zinc-800/50',
-        tableDivide: 'divide-red-900/30'
-      };
-    } else if (theme === 'gradient') {
-      return {
-        bg: 'bg-transparent',
-        cardBg: 'bg-white/10 backdrop-blur-md border border-white/20',
-        textPrimary: 'text-white',
-        textSecondary: 'text-white/70',
-        textMuted: 'text-white/50',
-        border: 'border-white/20',
-        hover: 'hover:bg-white/10',
-        inputBg: 'bg-white/10 backdrop-blur-md border border-white/20 text-white focus:ring-white/50 placeholder:text-white/50',
-        tableBg: 'bg-transparent',
-        tableHeader: 'bg-white/5',
-        tableDivide: 'divide-white/10'
-      };
-    } else {
-      // Light theme
-      return {
-        bg: 'bg-gray-50',
-        cardBg: 'bg-white border border-gray-200',
-        textPrimary: 'text-gray-900',
-        textSecondary: 'text-gray-600',
-        textMuted: 'text-gray-400',
-        border: 'border-gray-200',
-        hover: 'hover:bg-gray-100',
-        inputBg: 'bg-white border border-gray-300 text-gray-900 focus:ring-blue-500 placeholder:text-gray-400',
-        tableBg: 'bg-white',
-        tableHeader: 'bg-gray-50',
-        tableDivide: 'divide-gray-200'
-      };
-    }
+    return {
+      bg: 'bg-background',
+      cardBg: 'plutus-card',
+      textPrimary: 'text-gray-900',
+      textSecondary: 'text-gray-600',
+      textMuted: 'text-gray-500',
+      border: 'border-gray-200',
+      hover: 'hover:bg-gray-50',
+      inputBg: 'bg-white border border-gray-200 text-gray-900 focus:ring-blue-600/20 focus:border-blue-600 placeholder:text-gray-400',
+      tableBg: 'bg-white',
+      tableHeader: 'bg-gray-50/80',
+      tableDivide: 'divide-gray-100'
+    };
   };
 
   const colors = getThemeColors();
@@ -301,22 +269,15 @@ const Markets = () => {
         <title>Live Markets - Plutus</title>
         <meta name="description" content="Real-time cryptocurrency and stock market data. Track prices, market cap, and trading volumes." />
       </Helmet>
-      <div className={cn(
-        "min-h-screen pt-20",
-        theme === 'dark' 
-          ? 'bg-black'
-          : theme === 'gradient'
-          ? 'bg-gradient-to-br from-[#1a1a1a] via-[#2d1b69] to-[#1a3a52]'
-          : 'bg-gray-50'
-      )}>
+      <div className="min-h-screen pt-20 bg-background">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
             <div className="flex items-center justify-between mb-6">
               <div>
-                <h1 className={cn("text-4xl font-bold", colors.textPrimary)}>
+                <h1 className={cn("text-2xl font-bold tracking-tight", colors.textPrimary)}>
                   Live Markets
                 </h1>
-                <p className={cn("mt-2", colors.textSecondary)}>
+                <p className={cn("mt-1 text-sm", colors.textSecondary)}>
                   Real-time cryptocurrency and stock market data
                 </p>
                 {lastUpdated && (
@@ -328,14 +289,7 @@ const Markets = () => {
               <button
                 onClick={handleRefresh}
                 disabled={isRefreshing}
-                className={cn(
-                  "px-4 py-2 rounded-lg flex items-center gap-2 transition-colors",
-                  theme === 'dark'
-                    ? 'bg-gradient-to-r from-red-600 to-orange-500 hover:from-red-700 hover:to-orange-600 text-white'
-                    : theme === 'gradient'
-                    ? 'bg-white/20 hover:bg-white/30 backdrop-blur-md text-white border border-white/30'
-                    : 'bg-blue-600 hover:bg-blue-700 text-white'
-                )}
+                className="px-4 py-2 rounded-lg flex items-center gap-2 transition-colors text-sm font-semibold bg-white border border-gray-200 text-gray-700 hover:bg-gray-50"
               >
                 <RefreshCw className={cn("w-4 h-4", isRefreshing && "animate-spin")} />
                 {isRefreshing ? "Refreshing..." : "Refresh"}
@@ -344,33 +298,33 @@ const Markets = () => {
 
             {/* Market Stats Grid */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <div className={cn("p-4 rounded-lg", colors.cardBg)}>
-                <span className={colors.textMuted}>Market Cap</span>
-                <p className={cn("text-2xl font-bold", colors.textPrimary)}>
+              <div className={cn("p-4 rounded-xl", colors.cardBg)}>
+                <span className={cn("text-sm", colors.textMuted)}>Market Cap</span>
+                <p className={cn("text-2xl font-bold tnum", colors.textPrimary)}>
                   ${(marketStats.totalMarketCap / 1e12).toFixed(2)}T
                 </p>
               </div>
-              <div className={cn("p-4 rounded-lg", colors.cardBg)}>
+              <div className={cn("p-4 rounded-xl", colors.cardBg)}>
                 <div className="flex items-center gap-2">
-                  <TrendingUp className="w-4 h-4 text-green-500" />
-                  <span className={colors.textMuted}>Gainers</span>
+                  <TrendingUp className="w-4 h-4 price-up" />
+                  <span className={cn("text-sm", colors.textMuted)}>Gainers</span>
                 </div>
-                <p className={cn("text-2xl font-bold text-green-500")}>
+                <p className="text-2xl font-bold price-up tnum">
                   {marketStats.gainers}
                 </p>
               </div>
-              <div className={cn("p-4 rounded-lg", colors.cardBg)}>
+              <div className={cn("p-4 rounded-xl", colors.cardBg)}>
                 <div className="flex items-center gap-2">
-                  <TrendingDown className="w-4 h-4 text-red-500" />
-                  <span className={colors.textMuted}>Losers</span>
+                  <TrendingDown className="w-4 h-4 price-down" />
+                  <span className={cn("text-sm", colors.textMuted)}>Losers</span>
                 </div>
-                <p className={cn("text-2xl font-bold text-red-500")}>
+                <p className="text-2xl font-bold price-down tnum">
                   {marketStats.losers}
                 </p>
               </div>
-              <div className={cn("p-4 rounded-lg", colors.cardBg)}>
-                <span className={colors.textMuted}>24h Volume</span>
-                <p className={cn("text-2xl font-bold", colors.textPrimary)}>
+              <div className={cn("p-4 rounded-xl", colors.cardBg)}>
+                <span className={cn("text-sm", colors.textMuted)}>24h Volume</span>
+                <p className={cn("text-2xl font-bold tnum", colors.textPrimary)}>
                   ${(marketStats.totalVolume / 1e9).toFixed(2)}B
                 </p>
               </div>
@@ -379,10 +333,7 @@ const Markets = () => {
 
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
             <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
-              <TabsList className={cn(
-                "grid w-full grid-cols-4 md:w-auto md:inline-grid md:grid-cols-4 rounded-lg p-1",
-                theme === 'gradient' ? 'bg-white/10' : 'bg-gray-200'
-              )}>
+              <TabsList className="grid w-full grid-cols-4 md:w-auto md:inline-grid md:grid-cols-4 rounded-lg p-1 bg-gray-100">
                 <TabsTrigger value="all">All</TabsTrigger>
                 <TabsTrigger value="watchlist">Watchlist</TabsTrigger>
                 <TabsTrigger value="crypto">Crypto</TabsTrigger>
@@ -406,7 +357,7 @@ const Markets = () => {
           </motion.div>
 
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }} className={cn(
-            "rounded-2xl shadow-md overflow-hidden",
+            "rounded-xl overflow-hidden",
             colors.cardBg
           )}>
             <div className="overflow-x-auto">

@@ -55,11 +55,11 @@ const Education = () => {
   const getLevelColor = (level) => {
     switch (level) {
       case 'Beginner':
-        return 'bg-green-100 text-green-700';
+        return 'bg-emerald-50 text-emerald-700';
       case 'Intermediate':
-        return 'bg-blue-100 text-blue-700';
+        return 'bg-blue-50 text-blue-700';
       case 'Advanced':
-        return 'bg-purple-100 text-purple-700';
+        return 'bg-gray-100 text-gray-700';
       default:
         return 'bg-gray-100 text-gray-700';
     }
@@ -68,28 +68,19 @@ const Education = () => {
   return (
     <>
       <Helmet>
-        <title>Education - TradeFlow</title>
+        <title>Education - Plutus</title>
         <meta name="description" content="Learn trading with our comprehensive video tutorials and educational resources for all skill levels." />
       </Helmet>
 
-      <div className={cn(
-        "pt-16 min-h-screen",
-        theme === 'dark' ? 'bg-black' : theme === 'gradient' ? '' : 'bg-gray-50'
-      )}>
+      <div className="pt-16 min-h-screen bg-background">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             className="mb-12"
           >
-            <h1 className={cn(
-              "text-4xl md:text-5xl font-bold mb-4",
-              theme === 'dark' ? 'text-white' : 'text-gray-900'
-            )}>Education Center</h1>
-            <p className={cn(
-              "text-xl",
-              theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
-            )}>Master trading with expert-led tutorials</p>
+            <h1 className="text-2xl font-bold tracking-tight mb-1 text-gray-900">Education Center</h1>
+            <p className="text-sm text-gray-600">Master trading with expert-led tutorials</p>
           </motion.div>
 
           <motion.div
@@ -98,56 +89,26 @@ const Education = () => {
             transition={{ delay: 0.1 }}
             className="grid md:grid-cols-3 gap-6 mb-12"
           >
-            <div className={cn(
-              "rounded-2xl p-6 shadow-lg",
-              theme === 'dark'
-                ? 'bg-zinc-900 border border-red-900/30'
-                : theme === 'gradient'
-                ? 'bg-white/20 backdrop-blur-md border border-white/30'
-                : 'bg-white'
-            )}>
-              <BookOpen className="w-10 h-10 text-blue-600 mb-4" />
-              <h3 className={cn(
-                "text-xl font-semibold mb-2",
-                theme === 'dark' ? 'text-white' : 'text-gray-900'
-              )}>Comprehensive Guides</h3>
-              <p className={cn(
-                theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
-              )}>Step-by-step tutorials for every skill level</p>
+            <div className="plutus-card p-6">
+              <div className="w-11 h-11 rounded-lg bg-blue-50 flex items-center justify-center mb-4">
+                <BookOpen className="w-6 h-6 text-blue-600" />
+              </div>
+              <h3 className="text-lg font-semibold mb-1.5 text-gray-900">Comprehensive Guides</h3>
+              <p className="text-sm text-gray-600">Step-by-step tutorials for every skill level</p>
             </div>
-            <div className={cn(
-              "rounded-2xl p-6 shadow-lg",
-              theme === 'dark'
-                ? 'bg-zinc-900 border border-red-900/30'
-                : theme === 'gradient'
-                ? 'bg-white/20 backdrop-blur-md border border-white/30'
-                : 'bg-white'
-            )}>
-              <TrendingUp className="w-10 h-10 text-green-600 mb-4" />
-              <h3 className={cn(
-                "text-xl font-semibold mb-2",
-                theme === 'dark' ? 'text-white' : 'text-gray-900'
-              )}>Real-World Examples</h3>
-              <p className={cn(
-                theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
-              )}>Learn from actual market scenarios</p>
+            <div className="plutus-card p-6">
+              <div className="w-11 h-11 rounded-lg bg-blue-50 flex items-center justify-center mb-4">
+                <TrendingUp className="w-6 h-6 text-blue-600" />
+              </div>
+              <h3 className="text-lg font-semibold mb-1.5 text-gray-900">Real-World Examples</h3>
+              <p className="text-sm text-gray-600">Learn from actual market scenarios</p>
             </div>
-            <div className={cn(
-              "rounded-2xl p-6 shadow-lg",
-              theme === 'dark'
-                ? 'bg-zinc-900 border border-red-900/30'
-                : theme === 'gradient'
-                ? 'bg-white/20 backdrop-blur-md border border-white/30'
-                : 'bg-white'
-            )}>
-              <Award className="w-10 h-10 text-purple-600 mb-4" />
-              <h3 className={cn(
-                "text-xl font-semibold mb-2",
-                theme === 'dark' ? 'text-white' : 'text-gray-900'
-              )}>Expert Instructors</h3>
-              <p className={cn(
-                theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
-              )}>Learn from professional traders</p>
+            <div className="plutus-card p-6">
+              <div className="w-11 h-11 rounded-lg bg-blue-50 flex items-center justify-center mb-4">
+                <Award className="w-6 h-6 text-blue-600" />
+              </div>
+              <h3 className="text-lg font-semibold mb-1.5 text-gray-900">Expert Instructors</h3>
+              <p className="text-sm text-gray-600">Learn from professional traders</p>
             </div>
           </motion.div>
 
@@ -166,14 +127,7 @@ const Education = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 * index }}
-                className={cn(
-                  "rounded-2xl overflow-hidden shadow-lg hover:shadow-xl group",
-                  theme === 'dark'
-                    ? 'bg-zinc-900 border border-red-900/30'
-                    : theme === 'gradient'
-                    ? 'bg-white/20 backdrop-blur-md border border-white/30'
-                    : 'bg-white'
-                )}
+                className="plutus-card plutus-card-hover overflow-hidden group"
               >
                 <div className="relative aspect-video bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
                   <img alt={tutorial.title} className="w-full h-full object-cover" src="https://images.unsplash.com/photo-1700142909513-63c574cdda3f" />
@@ -190,10 +144,7 @@ const Education = () => {
                       {tutorial.level}
                     </span>
                   </div>
-                  <h3 className={cn(
-                    "text-lg font-semibold group-hover:text-blue-600",
-                    theme === 'dark' ? 'text-white' : 'text-gray-900'
-                  )}>
+                  <h3 className="text-base font-semibold group-hover:text-blue-600 text-gray-900 transition-colors">
                     {tutorial.title}
                   </h3>
                 </div>

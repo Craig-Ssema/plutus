@@ -6,10 +6,15 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
 const inFlightRequests = new Map();
 
-const debounceTimers = new Map();
+// key -> { timer, resolvers: [{ resolve, reject }] }
+const pendingDebounces = new Map();
 
 /**
- * Deduplicate and debounce chart data requests
+ * Deduplicate and debounce chart data requests.
+ * IMPORTANT: every caller's promise is tracked and resolved — when several
+ * components request the same chart at once (e.g. the desktop AND mobile
+ * chart instances on the Trade page), resetting the debounce timer must not
+ * orphan the earlier callers, or their charts hang on "loading" forever.
  * @param {string} key - Unique request key
  * @param {Function} requestFn - Function that makes the actual request
  * @param {number} debounceMs - Debounce delay in milliseconds
@@ -17,44 +22,40 @@ const debounceTimers = new Map();
  */
 const debouncedFetch = (key, requestFn, debounceMs = 300) => {
   return new Promise((resolve, reject) => {
-    // Clear existing timer for this key
-    if (debounceTimers.has(key)) {
-      clearTimeout(debounceTimers.get(key));
+    let entry = pendingDebounces.get(key);
+    if (!entry) {
+      entry = { timer: null, resolvers: [] };
+      pendingDebounces.set(key, entry);
     }
 
-    // Set new timer
-    const timer = setTimeout(async () => {
-      debounceTimers.delete(key);
+    // Register this caller so it always gets an answer
+    entry.resolvers.push({ resolve, reject });
 
-      // Check if same request is already in-flight
-      if (inFlightRequests.has(key)) {
-        console.log(`⏳ Frontend: Waiting for in-flight request: ${key}`);
-        try {
-          const result = await inFlightRequests.get(key);
-          resolve(result);
-        } catch (error) {
-          reject(error);
-        }
-        return;
-      }
+    // Reset the debounce window (without dropping earlier callers)
+    if (entry.timer) clearTimeout(entry.timer);
 
-      // Make new request
-      const promise = requestFn()
-        .finally(() => {
+    entry.timer = setTimeout(async () => {
+      const { resolvers } = entry;
+      pendingDebounces.delete(key);
+
+      // Reuse an in-flight request if one exists for this key
+      let promise = inFlightRequests.get(key);
+      if (!promise) {
+        promise = requestFn().finally(() => {
           inFlightRequests.delete(key);
         });
-
-      inFlightRequests.set(key, promise);
+        inFlightRequests.set(key, promise);
+      } else {
+        console.log(`⏳ Frontend: Reusing in-flight request: ${key}`);
+      }
 
       try {
         const result = await promise;
-        resolve(result);
+        resolvers.forEach((r) => r.resolve(result));
       } catch (error) {
-        reject(error);
+        resolvers.forEach((r) => r.reject(error));
       }
     }, debounceMs);
-
-    debounceTimers.set(key, timer);
   });
 };
 
@@ -109,10 +110,13 @@ export const fetchChartData = async (symbol, timeframe = '1D', type = 'crypto') 
 
 
 export const cancelPendingRequests = () => {
-  // Clear all debounce timers
-  debounceTimers.forEach(timer => clearTimeout(timer));
-  debounceTimers.clear();
-  
+  // Reject and clear all pending debounced callers
+  pendingDebounces.forEach((entry) => {
+    if (entry.timer) clearTimeout(entry.timer);
+    entry.resolvers.forEach((r) => r.reject(new Error('Request cancelled')));
+  });
+  pendingDebounces.clear();
+
   // Note: Can't cancel in-flight fetch requests without AbortController
   console.log('Cleared all pending debounced requests');
 };

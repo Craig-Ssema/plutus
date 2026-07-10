@@ -3,13 +3,10 @@ import { motion } from 'framer-motion';
 import { Helmet } from 'react-helmet';
 import { ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { useTheme } from '@/contexts/ThemeContext';
-import { cn } from '@/lib/utils';
 import Community from '@/components/hub/Community';
 
 const CommunityPage = () => {
   const navigate = useNavigate();
-  const { theme } = useTheme();
 
   return (
     <>
@@ -17,49 +14,37 @@ const CommunityPage = () => {
         <title>Community - Plutus</title>
         <meta name="description" content="Connect with traders worldwide and share insights." />
       </Helmet>
-      
-      <div className={cn(
-        "min-h-screen pt-20 pb-8 px-4",
-        theme === 'dark' ? 'bg-black' : theme === 'gradient' ? 'bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50' : 'bg-gray-50'
-      )}>
+
+      <div className="min-h-screen pt-20 pb-6 px-4 bg-background">
         <div className="max-w-7xl mx-auto">
-          {/* Header */}
+          {/* Slim Header */}
           <motion.div
-            initial={{ opacity: 0, y: -20 }}
+            initial={{ opacity: 0, y: -12 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mb-8"
+            className="mb-4 flex items-center gap-3"
           >
             <button
               onClick={() => navigate('/hub')}
-              className={cn(
-                "flex items-center gap-2 mb-4 px-4 py-2 rounded-lg transition-colors",
-                theme === 'dark'
-                  ? 'hover:bg-zinc-800 text-gray-400 hover:text-white'
-                  : 'hover:bg-white/60 text-gray-600'
-              )}
+              className="p-2 rounded-lg transition-colors hover:bg-gray-100 text-gray-500 hover:text-gray-900"
+              title="Back to Hub"
             >
-              <ArrowLeft className="w-4 h-4" />
-              Back to Hub
+              <ArrowLeft className="w-5 h-5" />
             </button>
-            <h1 className={cn(
-              "text-4xl font-bold tracking-tight mb-2",
-              theme === 'dark' ? 'text-white' : 'text-gray-900'
-            )}>
-              Trading Community
-            </h1>
-            <p className={cn(
-              "text-lg",
-              theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
-            )}>
-              Connect with traders worldwide and share your insights
-            </p>
+            <div>
+              <h1 className="text-xl font-bold tracking-tight text-gray-900 leading-tight">
+                Community
+              </h1>
+              <p className="text-sm text-gray-500">
+                Connect with traders worldwide
+              </p>
+            </div>
           </motion.div>
 
           {/* Community Content */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
+            transition={{ delay: 0.05 }}
           >
             <Community />
           </motion.div>

@@ -41,7 +41,7 @@ const MarketTableRow = ({ asset, index, isFavorited, onToggleFavorite }) => {
   }
 
   const isPositive = asset.change_24h_percent >= 0;
-  const strokeColor = isPositive ? '#16a34a' : '#dc2626';
+  const strokeColor = isPositive ? '#19A05B' : '#DC2828';
 
   const handleRowClick = (e) => {
     if (e.target.closest('.favorite-star')) {
@@ -51,40 +51,17 @@ const MarketTableRow = ({ asset, index, isFavorited, onToggleFavorite }) => {
     navigate('/trade', { state: { asset: asset.symbol } });
   };
 
-  // Get theme-appropriate colors
+  // Professional light design system colors
   const getThemeColors = () => {
-    if (theme === 'dark') {
-      return {
-        rowHover: 'hover:bg-zinc-800',
-        textPrimary: 'text-white',
-        textSecondary: 'text-gray-400',
-        textMuted: 'text-gray-500',
-        starColor: 'text-yellow-500',
-        starHover: 'hover:text-yellow-400',
-        buttonBg: 'bg-gradient-to-r from-red-600 to-orange-500 hover:from-red-700 hover:to-orange-600 text-white'
-      };
-    } else if (theme === 'gradient') {
-      return {
-        rowHover: 'hover:bg-white/5',
-        textPrimary: 'text-white',
-        textSecondary: 'text-white/70',
-        textMuted: 'text-white/50',
-        starColor: 'text-yellow-400',
-        starHover: 'hover:text-yellow-300',
-        buttonBg: 'bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white'
-      };
-    } else {
-      // Light theme
-      return {
-        rowHover: 'hover:bg-gray-50',
-        textPrimary: 'text-gray-900',
-        textSecondary: 'text-gray-600',
-        textMuted: 'text-gray-400',
-        starColor: 'text-yellow-500',
-        starHover: 'hover:text-yellow-400',
-        buttonBg: 'bg-blue-600 hover:bg-blue-700 text-white'
-      };
-    }
+    return {
+      rowHover: 'hover:bg-gray-50',
+      textPrimary: 'text-gray-900',
+      textSecondary: 'text-gray-500',
+      textMuted: 'text-gray-300',
+      starColor: 'text-amber-400',
+      starHover: 'hover:text-amber-400',
+      buttonBg: 'bg-white border border-gray-200 text-gray-700 hover:border-blue-600 hover:text-blue-600'
+    };
   };
 
   const colors = getThemeColors();
@@ -120,14 +97,7 @@ const MarketTableRow = ({ asset, index, isFavorited, onToggleFavorite }) => {
             {asset.logo_url ? (
               <img className="h-10 w-10 rounded-full" src={asset.logo_url} alt={asset.name} />
             ) : (
-              <div className={cn(
-                "h-10 w-10 rounded-full flex items-center justify-center text-xs font-semibold",
-                theme === 'dark' 
-                  ? "bg-zinc-800 text-white"
-                  : theme === 'gradient'
-                  ? "bg-white/10 text-white"
-                  : "bg-gray-200 text-gray-700"
-              )}>
+              <div className="h-10 w-10 rounded-full flex items-center justify-center text-xs font-semibold bg-gray-100 text-gray-600">
                 {asset.symbol?.slice(0, 2).toUpperCase()}
               </div>
             )}
@@ -143,36 +113,35 @@ const MarketTableRow = ({ asset, index, isFavorited, onToggleFavorite }) => {
         </div>
       </td>
       <td className="px-6 py-4 whitespace-nowrap">
-        <div className={cn("text-sm", colors.textPrimary)}>
+        <div className={cn("text-sm font-semibold tnum", colors.textPrimary)}>
           ${formatPrice(asset.price)}
         </div>
       </td>
       <td className="px-6 py-4 whitespace-nowrap">
         <span className={cn(
-          "px-2 py-1 inline-flex text-xs font-semibold rounded-full",
-          isPositive
-            ? "bg-green-100 text-green-800"
-            : "bg-red-100 text-red-800"
+          "text-sm font-medium tnum",
+          isPositive ? "price-up" : "price-down"
         )}>
           {isPositive ? '+' : ''}{asset.change_24h_percent?.toFixed(2)}%
         </span>
       </td>
       <td className="px-6 py-4 whitespace-nowrap text-sm">
         <span className={cn(
-          asset.change_7d_percent >= 0 
-            ? "text-green-600" 
-            : "text-red-600"
+          "font-medium tnum",
+          asset.change_7d_percent >= 0
+            ? "price-up"
+            : "price-down"
         )}>
           {asset.change_7d_percent >= 0 ? '+' : ''}{asset.change_7d_percent?.toFixed(2)}%
         </span>
       </td>
       <td className="px-6 py-4 whitespace-nowrap">
-        <div className={cn("text-sm", colors.textPrimary)}>
+        <div className={cn("text-sm tnum", colors.textPrimary)}>
           ${formatMarketCap(asset.market_cap_usd)}
         </div>
       </td>
       <td className="px-6 py-4 whitespace-nowrap">
-        <div className={cn("text-sm", colors.textSecondary)}>
+        <div className={cn("text-sm tnum", colors.textSecondary)}>
           ${formatMarketCap(asset.volume_24h)}
         </div>
       </td>
@@ -199,7 +168,7 @@ const MarketTableRow = ({ asset, index, isFavorited, onToggleFavorite }) => {
       </td>
       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
         <button className={cn(
-          "px-3 py-1 rounded-md text-sm font-medium transition-colors",
+          "px-3.5 py-1.5 rounded-lg text-sm font-semibold transition-colors",
           colors.buttonBg
         )}>
           Trade

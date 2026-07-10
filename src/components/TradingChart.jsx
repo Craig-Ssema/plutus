@@ -186,9 +186,9 @@ const TradingChart = ({ asset }) => {
           )}>
             ${Number(asset.price).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </span>
-          <span className={cn(
-            "text-lg font-semibold",
-            isPositive ? 'text-green-600' : 'text-red-600'
+            <span className={cn(
+            "text-lg font-semibold tnum",
+            isPositive ? 'price-up' : 'price-down'
           )}>
             {isPositive ? '▲' : '▼'} ${Math.abs(asset.change_24h || 0).toFixed(2)} ({Math.abs(asset.change_24h_percent || 0).toFixed(2)}%)
           </span>
@@ -266,12 +266,12 @@ const TradingChart = ({ asset }) => {
                 <linearGradient id="tradingColorPrice" x1="0" y1="0" x2="0" y2="1">
                   <stop 
                     offset="5%" 
-                    stopColor={isPositive ? '#10b981' : '#ef4444'} 
-                    stopOpacity={0.3}
+                    stopColor={isPositive ? '#19A05B' : '#DC2828'} 
+                    stopOpacity={0.25}
                   />
                   <stop 
                     offset="95%" 
-                    stopColor={isPositive ? '#10b981' : '#ef4444'} 
+                    stopColor={isPositive ? '#19A05B' : '#DC2828'} 
                     stopOpacity={0}
                   />
                 </linearGradient>
@@ -342,7 +342,7 @@ const TradingChart = ({ asset }) => {
               <Area
                 type="monotone"
                 dataKey="close"
-                stroke={isPositive ? '#10b981' : '#ef4444'}
+                stroke={isPositive ? '#19A05B' : '#DC2828'}
                 strokeWidth={2}
                 fill="url(#tradingColorPrice)"
                 animationDuration={800}

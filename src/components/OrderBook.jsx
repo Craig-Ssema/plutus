@@ -46,8 +46,8 @@ const OrderBook = ({ asset }) => {
   }).sort((a,b) => a.price - b.price);
 
   const OrderRow = ({ order, type }) => {
-    const colorClass = type === 'sell' ? 'text-red-600' : 'text-green-600';
-    const bgClass = type === 'sell' ? 'bg-red-500/10' : 'bg-green-500/10';
+    const colorClass = type === 'sell' ? 'price-down' : 'price-up';
+    const bgClass = type === 'sell' ? 'bg-red-500/10' : 'bg-emerald-500/10';
     return (
       <div className={cn(
         "grid grid-cols-3 text-sm px-2 py-1 relative transition-colors",
@@ -59,7 +59,7 @@ const OrderBook = ({ asset }) => {
             animate={{ width: `${order.depth}%` }}
             transition={{ duration: 0.5, ease: "easeOut" }}
         />
-        <span className={`font-medium z-10 ${colorClass}`}>{order.price}</span>
+        <span className={`font-medium z-10 tnum ${colorClass}`}>{order.price}</span>
         <span className={cn(
           "text-right z-10",
           theme === 'dark' ? 'text-gray-400' : theme === 'gradient' ? 'text-white/70' : 'text-gray-700'
@@ -111,7 +111,7 @@ const OrderBook = ({ asset }) => {
         "py-2 my-1 text-center border-y",
         theme === 'dark' ? 'border-red-900/30' : theme === 'gradient' ? 'border-white/20' : 'border-gray-200'
       )}>
-        <span className={`text-xl font-semibold ${isPositive ? 'text-green-600' : 'text-red-600'}`}>
+        <span className={`text-xl font-semibold tnum ${isPositive ? 'price-up' : 'price-down'}`}>
             {formatPrice(asset.price)}
         </span>
         <div className={cn(
