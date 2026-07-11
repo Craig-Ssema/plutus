@@ -1268,6 +1268,13 @@ const Community = () => {
                 const grouped = !newDay && prevSender === msgSender &&
                   (new Date(msg.created_at) - new Date(prev.created_at)) < 5 * 60 * 1000;
 
+                let td = null;
+                if (msg.trade_data) {
+                  try {
+                    td = typeof msg.trade_data === 'string' ? JSON.parse(msg.trade_data) : msg.trade_data;
+                  } catch (e) { td = null; }
+                }
+
                 return (
                   <React.Fragment key={msg.id || index}>
                     {newDay && (
@@ -1333,6 +1340,42 @@ const Community = () => {
                           "flex items-center gap-1.5",
                           msg.isOwn && "flex-row-reverse"
                         )}>
+                          {td ? (
+                            <div className={cn(
+                              "inline-block max-w-lg rounded-2xl border overflow-hidden bg-white",
+                              td.side === 'SELL' ? 'border-red-200' : 'border-emerald-200',
+                              msg.isOwn ? 'rounded-br-md' : 'rounded-bl-md'
+                            )}>
+                              <div className={cn(
+                                "px-3.5 py-2 flex items-center justify-between gap-8",
+                                td.side === 'SELL' ? 'bg-red-50' : 'bg-emerald-50'
+                              )}>
+                                <span className={cn(
+                                  "text-xs font-bold tracking-wide",
+                                  td.side === 'SELL' ? 'text-red-700' : 'text-emerald-700'
+                                )}>
+                                  {td.side}
+                                </span>
+                                <span className="text-sm font-bold text-gray-900">{td.symbol}</span>
+                              </div>
+                              <div className="px-3.5 py-2.5">
+                                <p className="text-sm text-gray-700 tnum">
+                                  {Number(td.quantity || 0).toFixed(4)} @ {"$" + Number(td.price || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                </p>
+                                {td.pnl != null && (
+                                  <p className={cn(
+                                    "text-sm font-semibold mt-0.5 tnum",
+                                    td.pnl >= 0 ? 'price-up' : 'price-down'
+                                  )}>
+                                    {(td.pnl >= 0 ? "+" : "-") + "$" + Math.abs(td.pnl).toFixed(2)} ({td.pnl >= 0 ? "+" : ""}{Number(td.pnlPercent || 0).toFixed(2)}%)
+                                  </p>
+                                )}
+                                {msg.message && (
+                                  <p className="text-sm text-gray-900 mt-2 whitespace-pre-wrap leading-relaxed">{msg.message}</p>
+                                )}
+                              </div>
+                            </div>
+                          ) : (
                           <div className={cn(
                             "px-3.5 py-2.5 inline-block max-w-lg break-words",
                             msg.type && msg.type !== 'message' && `border ${getMessageTypeColor(msg.type)}`,
@@ -1354,6 +1397,7 @@ const Community = () => {
                               <p className="text-sm whitespace-pre-wrap leading-relaxed">{msg.message}</p>
                             )}
                           </div>
+                          )}
                           {msg.isOwn && (
                             <button
                               onClick={() => handleDeleteMessage(msg)}

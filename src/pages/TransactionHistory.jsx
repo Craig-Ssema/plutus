@@ -4,8 +4,10 @@ import { motion } from 'framer-motion';
 import { useTheme } from '@/contexts/ThemeContext';
 import { cn } from '@/lib/utils';
 import { getTransactions } from '@/services/walletService';
-import { TrendingUp, TrendingDown, DollarSign, Download, Search, Filter, Calendar } from 'lucide-react';
+import { getTradingStatistics } from '@/services/tradingStatsService';
+import { TrendingUp, TrendingDown, DollarSign, Download, Search, Filter, Calendar, Trophy, Target, Share2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import ShareTradeModal from '@/components/ShareTradeModal';
 
 const TransactionHistory = () => {
   const { theme } = useTheme();
@@ -13,6 +15,8 @@ const TransactionHistory = () => {
   const [filteredTransactions, setFilteredTransactions] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState('all'); // all, buy, sell, profit, loss
+  const [perf, setPerf] = useState(null);
+  const [shareTrade, setShareTrade] = useState(null);
 
   useEffect(() => {
     loadTransactions();
@@ -29,6 +33,7 @@ const TransactionHistory = () => {
   const loadTransactions = () => {
     const txs = getTransactions(100); // Get last 100 transactions
     setTransactions(txs);
+    setPerf(getTradingStatistics());
   };
 
   const applyFilters = () => {
@@ -99,13 +104,8 @@ const TransactionHistory = () => {
     return date.toLocaleDateString();
   };
 
-  const stats = {
-    totalTrades: transactions.length,
-    buyCount: transactions.filter(tx => tx.type === 'BUY').length,
-    sellCount: transactions.filter(tx => tx.type === 'SELL').length,
-    profitableCount: transactions.filter(tx => tx.type === 'SELL' && tx.pnl > 0).length,
-    totalFees: transactions.reduce((sum, tx) => sum + (tx.fee || 0), 0)
-  };
+  const fmtMoney = (v, sign = false) =>
+    (sign && v > 0 ? "+" : v < 0 ? "-" : "") + "$" + Math.abs(v || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
   return (
     <>
@@ -113,126 +113,115 @@ const TransactionHistory = () => {
         <title>Transaction History - Plutus</title>
       </Helmet>
 
-      <div className={cn(
-        "pt-28 pb-12 px-4 min-h-screen",
-        theme === 'dark' ? 'bg-black' : theme === 'gradient' ? '' : 'bg-gray-50/50'
-      )}>
+      <div className="pt-28 pb-12 px-4 min-h-screen bg-background">
         <div className="max-w-7xl mx-auto">
           {/* Header */}
           <div className="mb-8">
-            <h1 className={cn(
-              "text-4xl font-bold mb-2",
-              theme === 'dark' ? 'text-white' : theme === 'gradient' ? 'text-white' : 'text-gray-900'
-            )}>
+            <h1 className="text-2xl font-bold tracking-tight mb-1 text-gray-900">
               Transaction History
             </h1>
-            <p className={cn(
-              "text-lg",
-              theme === 'dark' ? 'text-gray-300' : theme === 'gradient' ? 'text-gray-200' : 'text-gray-600'
-            )}>
-              View all your trades and transactions
+            <p className="text-sm text-gray-600">
+              Your trades, transactions, and performance
             </p>
           </div>
 
-          {/* Stats Cards */}
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className={cn(
-                "p-4 rounded-xl border",
-                theme === 'dark' ? 'bg-zinc-900 border-red-900/30' :
-                theme === 'gradient' ? 'bg-white/20 backdrop-blur-md border-white/30' :
-                'bg-white border-gray-200'
-              )}
-            >
-              <p className={cn(
-                "text-sm mb-1",
-                theme === 'dark' ? 'text-gray-300' : theme === 'gradient' ? 'text-gray-200' : 'text-gray-600'
-              )}>Total Trades</p>
-              <p className={cn(
-                "text-2xl font-bold",
-                theme === 'dark' ? 'text-white' : theme === 'gradient' ? 'text-white' : 'text-gray-900'
-              )}>{stats.totalTrades}</p>
-            </motion.div>
+          {/* Performance Panel */}
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-8"
+          >
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+              <div className="p-4 plutus-card">
+                <p className="text-sm text-gray-500 mb-1">Realized P&L</p>
+                <p className={cn(
+                  "text-2xl font-bold tnum",
+                  (perf?.totalRealizedPnL || 0) >= 0 ? 'price-up' : 'price-down'
+                )}>
+                  {fmtMoney(perf?.totalRealizedPnL, true)}
+                </p>
+                <p className="text-xs text-gray-400 mt-0.5 tnum">Net after fees: {fmtMoney(perf?.netProfit, true)}</p>
+              </div>
 
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-              className={cn(
-                "p-4 rounded-xl border",
-                theme === 'dark' ? 'bg-zinc-900 border-red-900/30' :
-                theme === 'gradient' ? 'bg-white/20 backdrop-blur-md border-white/30' :
-                'bg-white border-gray-200'
-              )}
-            >
-              <p className={cn(
-                "text-sm mb-1",
-                theme === 'dark' ? 'text-gray-300' : theme === 'gradient' ? 'text-gray-200' : 'text-gray-600'
-              )}>Buys</p>
-              <p className="text-2xl font-bold text-green-500">{stats.buyCount}</p>
-            </motion.div>
+              <div className="p-4 plutus-card">
+                <p className="text-sm text-gray-500 mb-1">Win Rate</p>
+                <p className={cn(
+                  "text-2xl font-bold tnum",
+                  (perf?.winRate || 0) >= 50 ? 'price-up' : 'text-gray-900'
+                )}>
+                  {(perf?.winRate || 0).toFixed(0)}%
+                </p>
+                <p className="text-xs text-gray-400 mt-0.5">
+                  {perf?.profitableTrades || 0} wins · {perf?.losingTrades || 0} losses
+                </p>
+              </div>
 
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className={cn(
-                "p-4 rounded-xl border",
-                theme === 'dark' ? 'bg-zinc-900 border-red-900/30' :
-                theme === 'gradient' ? 'bg-white/20 backdrop-blur-md border-white/30' :
-                'bg-white border-gray-200'
-              )}
-            >
-              <p className={cn(
-                "text-sm mb-1",
-                theme === 'dark' ? 'text-gray-300' : theme === 'gradient' ? 'text-gray-200' : 'text-gray-600'
-              )}>Sells</p>
-              <p className="text-2xl font-bold text-red-500">{stats.sellCount}</p>
-            </motion.div>
+              <div className="p-4 plutus-card">
+                <p className="text-sm text-gray-500 mb-1">Profit Factor</p>
+                <p className="text-2xl font-bold text-gray-900 tnum">
+                  {(perf?.profitFactor || 0).toFixed(2)}
+                </p>
+                <p className="text-xs text-gray-400 mt-0.5 tnum">
+                  Avg win {fmtMoney(perf?.avgProfit)} · avg loss {fmtMoney(perf?.avgLoss)}
+                </p>
+              </div>
 
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-              className={cn(
-                "p-4 rounded-xl border",
-                theme === 'dark' ? 'bg-zinc-900 border-red-900/30' :
-                theme === 'gradient' ? 'bg-white/20 backdrop-blur-md border-white/30' :
-                'bg-white border-gray-200'
-              )}
-            >
-              <p className={cn(
-                "text-sm mb-1",
-                theme === 'dark' ? 'text-gray-300' : theme === 'gradient' ? 'text-gray-200' : 'text-gray-600'
-              )}>Profitable</p>
-              <p className="text-2xl font-bold text-green-500">
-                {stats.sellCount > 0 ? Math.round((stats.profitableCount / stats.sellCount) * 100) : 0}%
-              </p>
-            </motion.div>
+              <div className="p-4 plutus-card">
+                <p className="text-sm text-gray-500 mb-1">Return on Investment</p>
+                <p className={cn(
+                  "text-2xl font-bold tnum",
+                  (perf?.returnOnInvestment || 0) >= 0 ? 'price-up' : 'price-down'
+                )}>
+                  {(perf?.returnOnInvestment || 0) >= 0 ? '+' : ''}{(perf?.returnOnInvestment || 0).toFixed(2)}%
+                </p>
+                <p className="text-xs text-gray-400 mt-0.5">Since 100k start</p>
+              </div>
+            </div>
 
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4 }}
-              className={cn(
-                "p-4 rounded-xl border",
-                theme === 'dark' ? 'bg-zinc-900 border-red-900/30' :
-                theme === 'gradient' ? 'bg-white/20 backdrop-blur-md border-white/30' :
-                'bg-white border-gray-200'
-              )}
-            >
-              <p className={cn(
-                "text-sm mb-1",
-                theme === 'dark' ? 'text-gray-300' : theme === 'gradient' ? 'text-gray-200' : 'text-gray-600'
-              )}>Total Fees</p>
-              <p className={cn(
-                "text-2xl font-bold",
-                theme === 'dark' ? 'text-white' : theme === 'gradient' ? 'text-white' : 'text-gray-900'
-              )}>${stats.totalFees.toFixed(2)}</p>
-            </motion.div>
-          </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="p-4 plutus-card">
+                <p className="text-sm text-gray-500 mb-1">Total Trades</p>
+                <p className="text-2xl font-bold text-gray-900 tnum">{perf?.totalTrades || 0}</p>
+                <p className="text-xs text-gray-400 mt-0.5">{perf?.totalBuys || 0} buys · {perf?.totalSells || 0} sells</p>
+              </div>
+
+              <div className="p-4 plutus-card">
+                <div className="flex items-center gap-1.5 mb-1">
+                  <Trophy className="w-3.5 h-3.5 text-amber-500" />
+                  <p className="text-sm text-gray-500">Best Trade</p>
+                </div>
+                {perf?.bestTrade ? (
+                  <>
+                    <p className="text-2xl font-bold price-up tnum">{fmtMoney(perf.bestTrade.pnl, true)}</p>
+                    <p className="text-xs text-gray-400 mt-0.5">{perf.bestTrade.symbol}</p>
+                  </>
+                ) : (
+                  <p className="text-2xl font-bold text-gray-300">—</p>
+                )}
+              </div>
+
+              <div className="p-4 plutus-card">
+                <div className="flex items-center gap-1.5 mb-1">
+                  <Target className="w-3.5 h-3.5 text-gray-400" />
+                  <p className="text-sm text-gray-500">Worst Trade</p>
+                </div>
+                {perf?.worstTrade ? (
+                  <>
+                    <p className="text-2xl font-bold price-down tnum">{fmtMoney(perf.worstTrade.pnl, true)}</p>
+                    <p className="text-xs text-gray-400 mt-0.5">{perf.worstTrade.symbol}</p>
+                  </>
+                ) : (
+                  <p className="text-2xl font-bold text-gray-300">—</p>
+                )}
+              </div>
+
+              <div className="p-4 plutus-card">
+                <p className="text-sm text-gray-500 mb-1">Total Fees Paid</p>
+                <p className="text-2xl font-bold text-gray-900 tnum">{fmtMoney(perf?.totalFees)}</p>
+                <p className="text-xs text-gray-400 mt-0.5">0.1% per trade</p>
+              </div>
+            </div>
+          </motion.div>
 
           {/* Filters */}
           <div className={cn(
@@ -322,12 +311,13 @@ const TransactionHistory = () => {
                     <th className="px-6 py-4 text-right text-sm font-semibold">Fee</th>
                     <th className="px-6 py-4 text-right text-sm font-semibold">Total</th>
                     <th className="px-6 py-4 text-right text-sm font-semibold">P/L</th>
+                    <th className="px-6 py-4 text-right text-sm font-semibold"><span className="sr-only">Share</span></th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                   {filteredTransactions.length === 0 ? (
                     <tr>
-                      <td colSpan="8" className="px-6 py-12 text-center">
+                      <td colSpan="9" className="px-6 py-12 text-center">
                         <p className={cn(
                           "text-lg",
                           theme === 'dark' ? 'text-gray-300' : theme === 'gradient' ? 'text-gray-200' : 'text-gray-400'
@@ -390,6 +380,15 @@ const TransactionHistory = () => {
                             <span className="text-gray-400">-</span>
                           )}
                         </td>
+                        <td className="px-6 py-4 text-right">
+                          <button
+                            onClick={() => setShareTrade(tx)}
+                            className="p-2 rounded-lg text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+                            title="Share to community"
+                          >
+                            <Share2 className="w-4 h-4" />
+                          </button>
+                        </td>
                       </tr>
                     ))
                   )}
@@ -397,6 +396,12 @@ const TransactionHistory = () => {
               </table>
             </div>
           </div>
+
+          <ShareTradeModal
+            open={!!shareTrade}
+            onClose={() => setShareTrade(null)}
+            trade={shareTrade}
+          />
         </div>
       </div>
     </>
